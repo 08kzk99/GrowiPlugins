@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Size Plugin Test</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <h1>Growi Image Size Plugin Test</h1>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    // Mock component to test our plugin
+    const ImageWithSize = ({ src, alt, width, height, style, ...rest }) => {
+      const [isModalOpen, setIsModalOpen] = React.useState(false);
+      const [imageSize, setImageSize] = React.useState({ 
+        width: width || '', 
+        height: height || '' 
+      });
+
+      // Combine width/height with style
+      const combinedStyle = {
+        ...style,
+        ...(imageSize.width && { width: typeof imageSize.width === 'number' ? `${imageSize.width}px` : imageSize.width }),
+        ...(imageSize.height && { height: typeof imageSize.height === 'number' ? `${imageSize.height}px` : imageSize.height }),
+      };
+
+      const toggleModal = () => {
+        setIsModalOpen(!isModalOpen);
+      };
+
+      const handleSizeChange = (newSize) => {
+        setImageSize({ ...imageSize, ...newSize });
+        setIsModalOpen(false);
+      };
+
+      return (
+        <>
+          <div>
+            <img 
+              src={src} 
+              alt={alt || ''} 
+              style={combinedStyle}
+              {...rest} 
+            />
+            <button 
+              onClick={toggleModal}
+              style={{
+                display: 'block',
+                margin: '10px 0',
+                padding: '5px 10px',
+                backgroundColor: '#4285f4',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+              }}
+            >
+              サイズ調整
+            </button>
+          </div>
+          
+          {isModalOpen && (
+            <div 
+              style={{
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 1000,
+              }}
+              onClick={() => setIsModalOpen(false)}
+            >
+              <div 
+                style={{
+                  backgroundColor: 'white',
+                  padding: '20px',
+                  borderRadius: '5px',
+                  maxWidth: '400px',
+                  width: '100%',
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h3 style={{ marginTop: 0 }}>画像サイズ調整</h3>
+                
+                <div style={{ marginBottom: '10px' }}>
+                  <label style={{ display: 'block', marginBottom: '5px' }}>幅:</label>
+                  <input 
+                    type="text" 
+                    value={imageSize.width || ''} 
+                    onChange={(e) => setImageSize({ ...imageSize, width: e.target.value })}
+                    style={{ width: '100%', padding: '5px' }}
+                    placeholder="例: 300px, 50%, auto"
+                  />
+                </div>
+                
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', marginBottom: '5px' }}>高さ:</label>
+                  <input 
+                    type="text" 
+                    value={imageSize.height || ''} 
+                    onChange={(e) => setImageSize({ ...imageSize, height: e.target.value })}
+                    style={{ width: '100%', padding: '5px' }}
+                    placeholder="例: 200px, auto"
+                  />
+                </div>
+                
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <button 
+                    onClick={() => setIsModalOpen(false)}
+                    style={{
+                      padding: '8px 16px',
+                      backgroundColor: '#f1f1f1',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    キャンセル
+                  </button>
+                  <button 
+                    onClick={() => handleSizeChange(imageSize)}
+                    style={{
+                      padding: '8px 16px',
+                      backgroundColor: '#4285f4',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    適用
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      );
+    };
+
+    // Test App
+    const App = () => {
+      return (
+        <div>
+          <h2>通常の画像</h2>
+          <img src="https://via.placeholder.com/300x200" alt="Normal Image" />
+          
+          <h2>サイズ調整可能な画像</h2>
+          <ImageWithSize src="https://via.placeholder.com/300x200" alt="Resizable Image" />
+          
+          <h2>使い方</h2>
+          <ol>
+            <li>上の「サイズ調整」ボタンをクリックしてください</li>
+            <li>表示されるモーダルで幅と高さを設定してください</li>
+            <li>「適用」ボタンをクリックして変更を適用してください</li>
+          </ol>
+          
+          <h2>実装の説明</h2>
+          <p>このプラグインは以下の機能を提供します：</p>
+          <ul>
+            <li>Growiのマークダウンレンダラーを拡張して画像コンポーネントを置き換え</li>
+            <li>画像サイズを簡単に調整できるUIを提供</li>
+            <li>HTMLタグを手動で入力する必要なく、画像サイズを調整可能</li>
+          </ul>
+        </div>
+      );
+    };
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
